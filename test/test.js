@@ -81,7 +81,7 @@ describe('archive helpers', function() {
     it('should read urls from sites.txt', function (done) {
       var urlArray = ['example1.com', 'example2.com'];
       fs.writeFileSync(archive.paths.list, urlArray.join('\n'));
-
+      // console.log(archive.paths.list);
       archive.readListOfUrls(function(urls) {
         expect(urls).to.deep.equal(urlArray);
         done();
@@ -155,4 +155,3 @@ describe('archive helpers', function() {
     });
   });
 });
-
