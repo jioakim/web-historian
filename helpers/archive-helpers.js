@@ -30,7 +30,7 @@ exports.initialize = function(pathsObj) {
 exports.readListOfUrls = function(callback) {
   fs.readFile(exports.paths.list, 'utf8', function (err, content) {
     if(err) {
-      //console.log('error', err);
+      console.log('error in readListOfUrls:', err);
       callback(err);
     } else {
       var urls = eol.split(content);
@@ -54,13 +54,12 @@ exports.isUrlInList = function(url, callback) {
 };
 
 exports.addUrlToList = function(url, callback) {
-  exports.isUrlInList(url, function(siteExist) {
-    if(!siteExist) {
+  exports.isUrlInList(url, function(siteExists) {
+    if(!siteExists) {
       //console.log(url);
-      url += '\n';
+      url += '\r\n';
       //need solution for Ioannis
       fs.appendFile(exports.paths.list, url, function(err) {
-        console.log(err);
         if (err) {
           callback(false);
         } else {
@@ -75,32 +74,31 @@ exports.addUrlToList = function(url, callback) {
 };
 
 exports.isUrlArchived = function(url, callback) {
-  // console.log('archivedSites path: ',path.join(exports.paths.archivedSites,url));
   fs.access(path.join(exports.paths.archivedSites, url), function(err){
-    // console.log(err ? 'no access!' : 'can read/write');
-    // console.log('inside isUrlArchived error', err);
     callback(!err);
   });
 };
 
 exports.downloadUrls = function(urls) {
   urls.forEach(function(url){
-    // do a GET request for each url
-    urlWithHttp = path.join('http://', url);
-    // console.log(url);
-    request(urlWithHttp, function(error, response, body){
-      // console.log('error:', error);
-      // console.log('response:', response);
-      // console.log('body:', body);
-      fs.writeFile(path.join(exports.paths.archivedSites, url), body, function(error){
-        console.log(error);
-      });
-    });
-    // if we get our data back
-      // create the file
-      // write the content of that website
-      // which is whatever the GET response is
-
+  //   exports.isUrlArchived(url, function(isArchived){
+  //     if (!isArchived) {
+        //urlWithHttp = url;
+        urlWithHttp = 'http://' + url;
+        request(urlWithHttp, function(error, response, body){
+          if (error) {
+            console.log('inside download urls request error:', error);
+          } else {
+            fs.writeFile(path.join(exports.paths.archivedSites, url), body, function(error){
+              if (error) {
+                console.log('inside download urls error:', error);
+              } else {
+                //console.log('inside download urls success:', response);
+              }
+            });
+          }
+        });
+  //     }
+  //   });
   });
-  // exports.readListOfUrls();
 };
